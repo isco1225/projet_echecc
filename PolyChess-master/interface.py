@@ -19,11 +19,11 @@ class Plateau:
         self.initialiser_cases()
 
     def initialiser_cases(self):
-        BLANChe = (205, 72, 44)
+        BLANCHE = (205, 72, 44)
         NOIR = (46, 46, 46)
         for i in range(8):
             for j in range(8):
-                couleur_case = BLANChe if (i + j) % 2 == 0 else NOIR
+                couleur_case = BLANCHE if (i + j) % 2 == 0 else NOIR
                 self.cases.append(Case(couleur_case, (i, j)))
 
 class JeuEchecs:
@@ -31,7 +31,7 @@ class JeuEchecs:
         pygame.init()
         self.taille_fenetre = (560, 560)
         self.fenetre = pygame.display.set_mode(self.taille_fenetre)
-        pygame.display.set_caption('Echecs')
+        pygame.display.set_caption('Échecs')
         self.pieces_capturees = []
 
         self.plateau = Plateau(70)
@@ -43,8 +43,8 @@ class JeuEchecs:
     def charger_images_pieces(self):
         self.images_pieces = {}
         for piece in ['Pion', 'Reine', 'Cavalier', 'Fou', 'Tour', 'Roi']:
-            self.images_pieces[piece + '_blanche'] = pygame.image.load(f'Screenshots/{piece}_blanche.png')
-            self.images_pieces[piece + '_noir'] = pygame.image.load(f'Screenshots/{piece}_noir.png')
+            self.images_pieces[piece + '_blanche'] = pygame.image.load(f'PolyChess-master/Screenshots/{piece}_blanche.png')
+            self.images_pieces[piece + '_noir'] = pygame.image.load(f'PolyChess-master/Screenshots/{piece}_noir.png')
 
     def dessiner_plateau(self):
         for case in self.plateau.cases:
@@ -55,33 +55,12 @@ class JeuEchecs:
             x, y = position
             image = self.images_pieces[piece]
             self.fenetre.blit(image, (x*self.plateau.taille_case, y*self.plateau.taille_case))
-            
-            
-    def obtenir_positions_pions(self, positions_pieces):
-        positions_pions = {}
-        cases_occupees = []
 
-        for position, piece in positions_pieces.items():
-            # Stocker la position du pion
-            positions_pions[piece] = position
-
-            # Stocker la case occupée par le pion
-            cases_occupees.append(position)
-
-        return positions_pions, cases_occupees
-
-
-    def bouffer_pion(self, position, positions_pieces):
-        if position in positions_pieces:
-            del positions_pieces[position]
-
-        
-        
-    
-    def deplacer_pion(self, position_clic, position, positions_pieces):
+    def bouger_piece(self, position_clic, positions_pieces):
         if self.piece_selectionnee:
             if position_clic in positions_pieces:
-                self.bouffer_pion(position, positions_pieces)
+                self.pieces_capturees.append(positions_pieces[position_clic])
+                del positions_pieces[position_clic]
             positions_pieces[position_clic] = self.piece_selectionnee
             del positions_pieces[self.position_clic_precedent]
             self.piece_selectionnee = None
@@ -91,12 +70,8 @@ class JeuEchecs:
                 self.piece_selectionnee = positions_pieces[position_clic]
                 self.position_clic_precedent = position_clic
 
-    
-            
-    
-
     def jouer(self):
-        BLANChe = (205, 72, 44)
+        BLANCHE = (205, 72, 44)
         NOIR = (46, 46, 46)
         positions_pieces = {
             (0, 0): 'Tour_blanche',
@@ -133,9 +108,6 @@ class JeuEchecs:
             (6, 6): 'Pion_noir',
             (7, 6): 'Pion_noir',
         }
-        
-        piece_selectionnee = None
-        position_clic_precedent = None
 
         running = True
         while running:
@@ -148,29 +120,11 @@ class JeuEchecs:
                     colonne = x // self.plateau.taille_case
                     ligne = y // self.plateau.taille_case
                     position_clic = (colonne, ligne)
-                    position = (colonne, ligne)
+                    self.bouger_piece(position_clic, positions_pieces)
 
-                    if position_clic in positions_pieces:
-                        piece_selectionnee = positions_pieces[position_clic]
-                        position_clic_precedent = position_clic
-
-                    elif piece_selectionnee:
-                        if position_clic in positions_pieces:
-                            self.bouffer_pion(position, positions_pieces)
-                        positions_pieces[position_clic] = piece_selectionnee
-                        del positions_pieces[position_clic_precedent]
-                        piece_selectionnee = None
-                        position_clic_precedent = None
-
-            self.fenetre.fill(BLANChe)
+            self.fenetre.fill(BLANCHE)
             self.dessiner_plateau()
             self.dessiner_pieces(positions_pieces)
-            
-            positions_pions, cases_occupees = self.obtenir_positions_pions(positions_pieces)
-            
-            # Affichage des positions des pions et des cases occupées (pour le débogage par exemple)
-           
-           
 
             pygame.display.flip()
 
@@ -180,3 +134,4 @@ class JeuEchecs:
 if __name__ == "__main__":
     jeu = JeuEchecs()
     jeu.jouer()
+
